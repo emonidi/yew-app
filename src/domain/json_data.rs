@@ -1,6 +1,5 @@
 
 use serde::Deserialize;
-use geojson::PointType;
 
 #[derive(Clone,PartialEq,Deserialize, Debug)]
 pub struct GpsLocation{
@@ -14,7 +13,8 @@ pub struct Airport{
     pub elevation_ft:String,
     pub external_id:i16,
     pub gps_code:String,
-    pub gps_location:GpsLocation
+    pub gps_location:GpsLocation,
+    pub id:String
 }
 
 #[derive(Clone,PartialEq,Deserialize)]

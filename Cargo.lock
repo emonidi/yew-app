@@ -512,6 +512,7 @@ dependencies = [
  "num-traits",
  "robust",
  "rstar",
+ "serde",
 ]
 
 [[package]]
@@ -1739,6 +1740,7 @@ dependencies = [
  "gloo-net",
  "js-sys",
  "serde",
+ "serde_json",
  "stdweb",
  "wasm-bindgen",
  "wasm-bindgen-futures",

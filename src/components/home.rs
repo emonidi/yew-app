@@ -1,75 +1,107 @@
-use std::ops::Deref;
+use crate::{
+    components::map::Map,
+    domain::json_data::JsonData,
+    helpers::{create_json::create_json, get_center_from_airports::get_center_from_airports},
+    stores::main_data::MainDataStore,
+};
+use geo::{ChaikinSmoothing, LineString};
+use gloo_net::http::Request;
 
-use wasm_bindgen::JsCast;
-use yew::{prelude::*, html::IntoPropValue};
-use weblog::{console_log};
-use web_sys::{Event, HtmlSelectElement, console};
-use crate::{components::map::{Map}, stores::main_data::{MainDataStore, self}, domain::json_data::Airport};
+use yew::prelude::*;
 use yewdux::functional::use_store;
 
+#[derive(Properties, PartialEq)]
+pub struct HomeProps {
+    pub flight_id: String,
+    pub pilot_id: String,
+}
+
 #[function_component(Home)]
-pub(crate) fn home() -> Html {
+pub(crate) fn home(props: &HomeProps) -> Html {
+    let (main_data_store, dispatch) = use_store::<MainDataStore>();
+    let pilot_id = props.pilot_id.clone();
+    let flight_id = props.flight_id.clone();
 
-    let (main_data_store,main_data_dispatch) = use_store::<MainDataStore>();
-    
-    let options = vec![
-        "mercator",
-        "globe",
-        "albers",
-        "equalEarth",
-        "equirectangular",
-        "lambertConformalConic",
-        "naturalEarth",
-        "winkelTripel",
-    ];
-
-    
-
-    let projection = use_state(|| "globe");
-
-    let on_select_change = {
-        let projection = projection.clone();
-        Callback::from(move |e: Event| {
-            let target = e
-                .target()
+    {
+        use_effect_with_deps(
+            move |_| {
+                wasm_bindgen_futures::spawn_local(async move {
+                    let data:JsonData = Request::get(&format!("https://api.allorigins.win/raw?url=https://api.followingpilots.com/api/user/public/{}/flyover/{}/?format=json",pilot_id,flight_id))
+                .send()
+                .await
                 .unwrap()
-                .value_of()
-                .dyn_into::<HtmlSelectElement>()
+                .json()
+                .await
                 .unwrap();
-            let selected = options[target.selected_index() as usize];
-            projection.set(selected);
-        })
-    };
 
-    html!{
-        <div>
-            <fieldset class="absolute ml-0 mt-0 z-10">
-                <label>{"Select projection"}</label>
-                <select id="projection" name="projection" onchange={on_select_change}>
-                    <option value="mercator">{"Mercator"}</option>
-                    <option value="globe">{"Globe"}</option>
-                    <option value="albers">{"Albers"}</option>
-                    <option value="equalEarth">{"Equal Earth"}</option>
-                    <option value="equirectangular">{"Equirectangular"}</option>
-                    <option value="lambertConformalConic">{"Lambert Conformal Conic"}
-                    </option>
-                    <option value="naturalEarth">{"Natural Earth"}</option>
-                    <option value="winkelTripel">{"Winkel Tripel"}</option>
-                </select>
-            </fieldset>
-                <Map projection={*projection} zoom="10" center={
-                    let taking_off_airport = main_data_store.airports.get(0);
-                    match taking_off_airport {
-                        Some(airport)=>{
-                            console_log!(airport.gps_location.coordinates.0);
-                            airport.gps_location.coordinates
-                        },
-                        None=>{
-                            (0.00,0.00)
+                    dispatch.reduce_mut(|state| {
+                        state.airports.push(data.takeoff_airport);
+                        state.airports.push(data.landing_airport);
+                    });
+
+                    match data.gps_data_url {
+                        Some(url) => {
+                            if url != "" {
+                                let data: geojson::FeatureCollection = Request::get(
+                                    format!("https://api.allorigins.win/raw?url={}", &url).as_str(),
+                                )
+                                .send()
+                                .await
+                                .unwrap()
+                                .json()
+                                .await
+                                .unwrap();
+
+                                let path_geo_json = data.features.get(1).unwrap();
+                                let path_geom: LineString<f64> =
+                                    LineString::try_from(path_geo_json.geometry.clone().unwrap())
+                                        .unwrap();
+                                let interpolated = path_geom.chaikin_smoothing(10);
+
+                                let json_collection = create_json(path_geo_json);
+
+                                dispatch.reduce_mut(|state| {
+                                    let interpolated = interpolated.clone();
+                                    state.path = interpolated;
+                                    state.geo_json_path = Some(json_collection.clone());
+                                    state.geo_json_line = Some(path_geo_json.clone());
+                                    let (center_2d, bounds) = get_center_from_airports(
+                                        (*state.airports).to_vec(),
+                                        Some(state.path.clone()),
+                                    );
+                                    state.center_2d = center_2d;
+                                    state.bounds = bounds;
+                                });
+                            } else {
+                                dispatch.reduce_mut(|state| {
+                                    let (center_2d, bounds) =
+                                        get_center_from_airports((*state.airports).to_vec(), None);
+                                    state.center_2d = center_2d;
+                                    state.bounds = bounds;
+                                });
+                            }
+                        }
+                        _ => {
+                            dispatch.reduce_mut(|state| {
+                                let (center_2d, bounds) =
+                                    get_center_from_airports((*state.airports).to_vec(), None);
+                                state.center_2d = center_2d;
+                                state.bounds = bounds;
+                            });
                         }
                     }
-                }/>
-                
+                });
+                || ()
+            },
+            (),
+        );
+    }
+
+    html! {
+            <div>
+                <Map projection={"globe"} zoom="1" center={main_data_store.center_2d} >
+
+                </Map>
             </div>
     }
 }
