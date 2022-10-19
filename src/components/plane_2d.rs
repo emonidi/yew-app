@@ -87,6 +87,7 @@ pub fn plane_2d() -> Html {
                             let interval = setInterval(()=>{
                                 if(window.plane_2d_marker){
                                     plane_2d_marker.remove();
+                                    clearInterval(interval);
                                 }
                             },100)
                         }
