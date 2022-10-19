@@ -40,7 +40,6 @@ pub fn create_json(line_string: &Feature) -> FeatureCollection{
         features,
         foreign_members:None
     };
-    console_log!(collection.features.len());
     return collection;
 
 }

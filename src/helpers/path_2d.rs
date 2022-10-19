@@ -116,7 +116,7 @@ impl GeoPath2D {
                  }
             });
             
-             console.log(JSON.parse(@{GeoJson::from(geometry.clone()).to_string()}));
+           
 
              mapInstance.addSource(@{id.clone()},{
                 type:"geojson",
@@ -133,7 +133,7 @@ impl GeoPath2D {
                 }
              });
 
-             console.log(layer);
+         
           }
         }
     }

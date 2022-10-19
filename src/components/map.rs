@@ -1,10 +1,9 @@
-use crate::stores::main_data::MainDataStore;
 use crate::helpers::path_2d::GeoPath2D;
-use crate::helpers::cirlcle::circle;
-use geo::point;
-use geojson::{FeatureCollection, GeoJson};
+use crate::stores::main_data::MainDataStore;
+use geojson::FeatureCollection;
 use stdweb::js;
 use web_sys::HtmlElement;
+
 use weblog::console_log;
 use yew::prelude::*;
 use yew::use_effect;
@@ -17,15 +16,17 @@ pub struct MapProps {
     pub zoom: AttrValue,
     pub center: (f64, f64),
     pub path_2d: Option<FeatureCollection>,
+    #[prop_or_default]
+    pub children: Children,
 }
 
 #[function_component(Map)]
 pub(crate) fn map(props: &MapProps) -> Html {
     let map_loaded = use_state(|| false);
     let (main_data_store, _dispatch) = use_store::<MainDataStore>();
+
     // let map_ready = use_mapbox();
     let map_ref = use_node_ref();
-
     {
         let projection = props.projection.clone();
         use_effect_with_deps(
@@ -47,9 +48,9 @@ pub(crate) fn map(props: &MapProps) -> Html {
             |center_2d| {
                 let center = center_2d.clone();
                 js! {
-                    console.log("center",@{center.0},@{center.1});
+
                     if(window.mapInstance){
-                        console.log([@{center.0},@{center.1}]);
+
                         mapInstance.setCenter([@{center.0},@{center.1}]);
                     }
                 }
@@ -66,8 +67,8 @@ pub(crate) fn map(props: &MapProps) -> Html {
                 let geo_json_path = main_data_store.geo_json_line.clone();
                 let is2d = main_data_store.is2d.clone();
                 let center_2d = main_data_store.center_2d;
-                if(airports.len() > 0){
-                    let path_2d = GeoPath2D::new(airports,geo_json_path,center_2d);
+                if (airports.len() > 0) {
+                    let path_2d = GeoPath2D::new(airports, geo_json_path, center_2d);
                     path_2d.get();
                 };
                 || ()
@@ -80,14 +81,13 @@ pub(crate) fn map(props: &MapProps) -> Html {
         use_effect_with_deps(
             move |(main_data_store, _map_loaded)| {
                 let bounds = main_data_store.bounds.clone();
-                
+
                 match bounds {
                     Some(bounds) => {
                         // let b = vec![bounds.min().x,bounds.min().y,bounds.max().x,bounds.max().y];
                         js! {
 
                            if(window.mapInstance){
-                            console.log("bounds has bounds");
                             mapInstance.setZoom(1);
                             mapInstance.fitBounds([
                                 @{bounds.min().x},
@@ -101,7 +101,7 @@ pub(crate) fn map(props: &MapProps) -> Html {
                     None => {
                         js! {
                             if(window.mapInstance){
-                                console.log("bounds no bounds");
+
                                 mapInstance.zoomTo(12,{duration:2000});
                             }
                         }
@@ -125,7 +125,7 @@ pub(crate) fn map(props: &MapProps) -> Html {
                     js! {
                         if(window.mapboxgl && !window.mapInstance){
 
-                            console.log("mapInstance");
+
                             mapboxgl.accessToken = "pk.eyJ1IjoiZW1vbmlkaSIsImEiOiJjajdqd3pvOHYwaThqMzJxbjYyam1lanI4In0.V_4P8bJqzHxM2W9APpkf1w";
                             window.mapInstance = new mapboxgl.Map({
                                  container:"map",
@@ -161,6 +161,6 @@ pub(crate) fn map(props: &MapProps) -> Html {
     }
 
     html! {
-        <div ref={map_ref} id="map" class="w-full min-h-screen" style="min-height:100vh"></div>
+        <div ref={map_ref} id="map" class="w-full min-h-screen" style="min-height:100vh">{props.children.clone()}</div>
     }
 }

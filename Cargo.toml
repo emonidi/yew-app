@@ -23,6 +23,8 @@ yewdux = "0.8"
 geo = { version = "0.23.0", features = ["use-serde"] }
 geo-types = "0.7.7"
 serde_json = "1.0.86"
+yew-hooks = "0.1.56"
+
 
 [dependencies.web-sys]
 version = "0.3.60"
@@ -32,6 +34,7 @@ features = [
     'Document',
     'Element',
     'Node',
+    'HtmlImageElement',
     'Window'
 ]
 

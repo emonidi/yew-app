@@ -3,6 +3,7 @@ use crate::{
     domain::json_data::JsonData,
     helpers::{create_json::create_json, get_center_from_airports::get_center_from_airports},
     stores::main_data::MainDataStore,
+    components::plane_2d::Plane2d
 };
 use geo::{ChaikinSmoothing, LineString};
 use gloo_net::http::Request;
@@ -99,8 +100,8 @@ pub(crate) fn home(props: &HomeProps) -> Html {
 
     html! {
             <div>
-                <Map projection={"globe"} zoom="1" center={main_data_store.center_2d} >
-
+                <Map projection={"globe"} zoom="1" center={main_data_store.center_2d}>
+                    <Plane2d/>
                 </Map>
             </div>
     }
