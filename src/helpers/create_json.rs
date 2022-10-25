@@ -16,7 +16,7 @@ pub fn create_json(line_string: &Feature) -> FeatureCollection{
                 let mut feature = Feature::from(geojson::Geometry::new(point));
 
                 feature.set_property("altitude", *coord.get(2).unwrap());
-                feature.set_property("time", *coord.get(3).unwrap());
+                feature.set_property("time", *coord.get(3).unwrap()*1000.00);
                 let point_from = Point::new(*coord.get(0).unwrap(), *coord.get(1).unwrap());
                 let point_to;
                 let next_line = line.get(index + 1).clone();

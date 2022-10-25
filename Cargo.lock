@@ -1738,6 +1738,7 @@ dependencies = [
  "geo-types",
  "geojson",
  "gloo-net",
+ "gloo-render",
  "js-sys",
  "serde",
  "serde_json",

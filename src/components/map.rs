@@ -1,9 +1,14 @@
 use crate::helpers::path_2d::GeoPath2D;
+use crate::stores::animation::AnimationAction;
+use crate::stores::animation::AnimationStore;
 use crate::stores::main_data::MainDataStore;
 use geojson::FeatureCollection;
 use stdweb::js;
+use wasm_bindgen::JsCast;
+use wasm_bindgen::prelude::Closure;
 use web_sys::HtmlElement;
 
+use web_sys::window;
 use weblog::console_log;
 use yew::prelude::*;
 use yew::use_effect;
@@ -24,6 +29,9 @@ pub struct MapProps {
 pub(crate) fn map(props: &MapProps) -> Html {
     let map_loaded = use_state(|| false);
     let (main_data_store, _dispatch) = use_store::<MainDataStore>();
+    
+   
+    
 
     // let map_ready = use_mapbox();
     let map_ref = use_node_ref();
@@ -77,6 +85,7 @@ pub(crate) fn map(props: &MapProps) -> Html {
         )
     }
 
+    
     {
         use_effect_with_deps(
             move |(main_data_store, _map_loaded)| {

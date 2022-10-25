@@ -1,4 +1,4 @@
-use crate::stores::main_data::MainDataStore;
+use crate::stores::{main_data::MainDataStore, animation::AnimationStore};
 use geo::{point, Bearing, Point};
 use stdweb::{
     js,
@@ -29,7 +29,7 @@ extern "C" {
 pub fn plane_2d() -> Html {
     let image = use_node_ref();
     let (main_data_store, _dispatch) = use_store::<MainDataStore>();
-
+    let (animation_store, animation_dispatch) = use_store::<AnimationStore>();
     {
         let image = image.clone();
         use_effect_with_deps(
@@ -53,6 +53,21 @@ pub fn plane_2d() -> Html {
             (),
         );
     }
+
+    {
+        let animation_store = animation_store.clone();  
+        use_effect_with_deps(move |position|{
+            js!{
+                if(window.plane_2d_marker){
+                    plane_2d_marker.setLngLat([@{position.lat},@{position.lng}]);
+                    // plane_2d_marker.addTo(mapInstance);
+                    plane_2d_marker.setRotation(@{position.bearing});
+                }
+            }
+            || ()
+        }, animation_store.position);
+    }
+
 
     {
         let geo_json_path = main_data_store.geo_json_path.clone();
