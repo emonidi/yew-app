@@ -40,9 +40,7 @@ pub fn plane_2d() -> Html {
                           let image = new Image();
                           image.classList.add("w-20");
                           image.src = "/assets/models/svg_plane.svg";
-
                           window.plane_2d_marker = new mapboxgl.Marker(image);
-                          console.log(window.plane_2d_marker);
                           clearInterval(interval);
                         }
 

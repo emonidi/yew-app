@@ -11,7 +11,7 @@ pub struct Airport{
     pub city:String,
     pub continent:String,
     pub elevation_ft:String,
-    pub external_id:i16,
+    // pub external_id:usize,
     pub gps_code:String,
     pub gps_location:GpsLocation,
     pub id:String

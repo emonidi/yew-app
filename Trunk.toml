@@ -21,8 +21,6 @@ open = true
 no_autoreload = false
 
 [tools]
-# Default dart-sass version to download.
-sass = "1.54.9"
 # Default wasm-bindgen version to download.
 wasm_bindgen = "0.2.83"
 # Default wasm-opt version to download.

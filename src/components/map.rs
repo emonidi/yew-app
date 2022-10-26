@@ -1,15 +1,10 @@
 use crate::helpers::path_2d::GeoPath2D;
-use crate::stores::animation::AnimationAction;
-use crate::stores::animation::AnimationStore;
 use crate::stores::main_data::MainDataStore;
 use geojson::FeatureCollection;
 use stdweb::js;
-use wasm_bindgen::JsCast;
-use wasm_bindgen::prelude::Closure;
 use web_sys::HtmlElement;
 
-use web_sys::window;
-use weblog::console_log;
+
 use yew::prelude::*;
 use yew::use_effect;
 use yew::virtual_dom::AttrValue;
@@ -103,7 +98,7 @@ pub(crate) fn map(props: &MapProps) -> Html {
                                 @{bounds.min().y},
                                 @{bounds.max().x},
                                 @{bounds.max().y},
-                            ], { padding: 50, duration: 2000 });
+                            ], { padding: {top:50,left:50, bottom:190+50,right:50}, duration: 2000 });
                            }
                         }
                     }
@@ -170,6 +165,6 @@ pub(crate) fn map(props: &MapProps) -> Html {
     }
 
     html! {
-        <div ref={map_ref} id="map" class="w-full min-h-screen" style="min-height:100vh">{props.children.clone()}</div>
+        <div ref={map_ref} id="map" class="w-full min-h-screen fixed" style="min-height:100vh">{props.children.clone()}</div>
     }
 }

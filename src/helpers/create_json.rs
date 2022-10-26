@@ -28,7 +28,9 @@ pub fn create_json(line_string: &Feature) -> FeatureCollection{
                         point_to = Point::new(*coord.get(0).unwrap(), *coord.get(1).unwrap());
                     }
                 }
+                feature.set_property("speed", *coord.get(4).unwrap());
                 feature.set_property("bearing", point_from.bearing(point_to));
+             
                 features.push(feature);
                 index += 1;
             }
